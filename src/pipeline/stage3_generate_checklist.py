@@ -18,7 +18,11 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 
-from src.prompts import generate_checklist_1
+from src.prompts import generate_checklist_1, generate_checklist_1_en
+
+# Language switch: ``OSCE_LANG=en`` selects the English prompt; default is Korean.
+if os.getenv("OSCE_LANG") == "en":
+    generate_checklist_1 = generate_checklist_1_en
 from src.utils import trimAndLoadJson
 from src.logging_utils import (
     setup_logging,

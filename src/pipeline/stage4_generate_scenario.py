@@ -24,7 +24,17 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 
-from src.prompts import generate_scenario_2, generate_scenario_3
+from src.prompts import (
+    generate_scenario_2,
+    generate_scenario_2_en,
+    generate_scenario_3,
+    generate_scenario_3_en,
+)
+
+# Language switch: ``OSCE_LANG=en`` selects English prompts; default is Korean.
+if os.getenv("OSCE_LANG") == "en":
+    generate_scenario_2 = generate_scenario_2_en
+    generate_scenario_3 = generate_scenario_3_en
 from src.utils import checklist_to_markdown
 from src.logging_utils import (
     setup_logging,

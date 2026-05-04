@@ -13,6 +13,7 @@ disease: a major disease for that complaint, grounded in the reference knowledge
 name: a plausible patient name (avoid generic placeholders like "John Doe" or "Jane Doe")
 age: an age statistically appropriate for the disease
 gender: a gender consistent with the disease's epidemiology
+vital_sign: blood pressure, heart rate, respiratory rate, and temperature, formatted exactly as the JSON example below
 
 ## Reference knowledge:
 {book_content}

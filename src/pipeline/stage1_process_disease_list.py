@@ -16,7 +16,11 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 
-from src.prompts import generate_disease_list_0
+from src.prompts import generate_disease_list_0, generate_disease_list_0_en
+
+# Language switch: ``OSCE_LANG=en`` selects the English prompt; default is Korean.
+if os.getenv("OSCE_LANG") == "en":
+    generate_disease_list_0 = generate_disease_list_0_en
 from src.utils import trimAndLoadJson
 from src.logging_utils import (
     setup_logging,
