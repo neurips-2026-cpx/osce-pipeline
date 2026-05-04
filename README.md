@@ -7,51 +7,13 @@ The repository covers two complementary halves:
 1. **Data generation** — turns per-symptom medical reference text into a
    structured corpus of fictional patients, OSCE-style interview checklists,
    and voice-ready standardised-patient scenarios.
-2. **Runtime + auto-grading** — drives a streaming simulated-patient chat
-   from any of those scenarios, then auto-grades the student's session
-   against the checklist and a five-dimension patient–doctor-relationship
-   rubric.
+2. **Runtime + auto-grading** — drives a simulated-patient chat from any of
+   those scenarios, then auto-grades the student's session against the
+   checklist and a five-dimension patient–doctor-relationship rubric.
 
 This release accompanies our NeurIPS submission. The seed corpus and the
 full released dataset are distributed separately — see
 [`data/README.md`](data/README.md).
-
-## At a glance
-
-```
-                    DATA GENERATION                        RUNTIME + GRADING
-                    ────────────────                       ─────────────────
-
- seed/<symptom>.txt                                     example_patient.json
-        │                                                       │
-        ▼                                                       ▼
-   stage 1 (gpt-4.1, t=0.2, seed=42)                  ┌──────────────────────┐
-   GENERATE_DISEASE_LIST                              │ chat_with_patient    │
-        │                                             │ gpt-4o, t=0.5,       │
-        ▼                                             │ streaming, seed=42   │
-   stage 2 (no LLM)                                   └──────────┬───────────┘
-   merge per-symptom JSONs                                       │  student
-        │                                                        │  doctor
-        ▼                                                        ▼  session
-   stage 3 (gpt-4.1, t=0.2, seed=42)                  ┌──────────────────────┐
-   CHECKLIST_PROMPT_TEMPLATE_DATAGEN                  │ generate_checklist   │
-        │                                             │ evaluate_checklist   │
-        ▼                                             │ evaluate_relationship│
-   stage 4 (gpt-4.1, t=0.2, seed=42)                  │ generate_feedback    │
-   SCENARIO_PROMPT_TEMPLATE_1 (draft)                 │ gpt-4o, t=0, seed=42 │
-   SCENARIO_PROMPT_TEMPLATE_2 (polish)                └──────────┬───────────┘
-        │                                                        ▼
-        ▼                                                  GradingResult
-   all_disease_with_scenarios.json                       (checklist score,
-   (each patient gets a "prompt" field;                   relationship 1-5,
-    consumable by chat_with_patient)                      total score, grade,
-                                                          feedback)
-```
-
-All prompts are documented under [`prompts/`](prompts/) (Korean originals)
-and [`prompts/en/`](prompts/en/) (English variants). Both languages share
-the same placeholder variables, so flipping `lang="ko"` to `lang="en"` is
-the only change needed at the API surface.
 
 ## Repository layout
 
@@ -92,19 +54,16 @@ the only change needed at the API surface.
 
 ## Models and decoding
 
-| Component | Model | Temperature | Streaming | Seed |
-|---|---|---|---|---|
-| Data-gen stages 1, 3, 4 | gpt-4.1 | 0.2 | off | 42 |
-| Runtime: simulated-patient chat | gpt-4o | 0.5 | **on** | 42 |
-| Runtime: checklist / scenario / grading | gpt-4o | 0 | off | 42 |
+| Component | Model | Temperature | Seed |
+|---|---|---|---|
+| Data-gen stages 1, 3, 4 | gpt-4.1 | 0.2 | 42 |
+| Runtime: checklist / scenario / grading | gpt-4o | 0 | 42 |
 
 Two distinct OpenAI models are used because the experiment evolved in two
 phases. The data-generation pipeline (gpt-4.1) produced the bulk dataset;
-the runtime simulator + grader (gpt-4o) were locked earlier and we keep
-them as-run for reproducibility. The chat path uses temperature 0.5 so the
-simulated patient does not produce identical replies on identical inputs;
-all other LLM calls are deterministic (temperature 0) with `seed=42` for
-best-effort reproducibility under OpenAI's seeded-completion API.
+the runtime + grader (gpt-4o) were locked earlier and we keep them as-run
+for reproducibility. All LLM calls use `seed=42` for best-effort
+reproducibility under OpenAI's seeded-completion API.
 
 ## Installation
 
@@ -117,19 +76,6 @@ pip install -r requirements.txt
 cp .env.example .env       # then put your OpenAI key in .env
 ```
 
-## Quickstart — interactive demo
-
-```bash
-bash run_demo.sh
-# or, in English:
-bash run_demo.sh --lang en
-```
-
-The demo loads `data/samples/patient/example_patient.json`, runs an
-interactive history-taking session in the terminal, and on `exit` prints
-the auto-graded result (checklist score, five 1–5 relationship scores,
-total score, letter grade, and a 350-word OSCE-format feedback report).
-
 ## Bulk data generation
 
 Place one UTF-8 text file per chief complaint under `data/seed/`, then run:
@@ -141,10 +87,6 @@ bash run_all.sh
 A synthetic placeholder reference file is shipped at
 [`data/samples/input/cough.txt`](data/samples/input/cough.txt) — copy it
 into `data/seed/` for a single-symptom dry run.
-
-A full run over an 80-symptom corpus takes roughly 3–4 hours; the limiting
-factor is the OpenAI rate budget for stage 4 (the longest two-step
-generation).
 
 ## Running stages individually
 
