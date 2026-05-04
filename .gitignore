@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Pipeline outputs and seed corpus (not redistributed)
+data/seed/
+
+# Logs
+logging.txt
+*.log
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+.claude/
+*.swp
+.ipynb_checkpoints/

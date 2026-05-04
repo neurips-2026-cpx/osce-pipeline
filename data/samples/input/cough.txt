@@ -1,0 +1,42 @@
+# Cough — Reference Knowledge (synthetic example, NOT from any textbook)
+
+This file is a minimal synthetic illustration of the format the pipeline
+expects under `data/seed/<chief complaint>.txt`. Replace it with your own
+reference material before running the pipeline.
+
+## Common diseases that present with cough
+
+- Pneumonia: typically presents with productive cough, fever, dyspnea,
+  pleuritic chest pain. Examination may reveal crackles. CXR shows
+  consolidation.
+- Acute bronchitis: cough lasting fewer than three weeks, often viral,
+  may follow upper respiratory infection. No focal consolidation.
+- Asthma: episodic cough often worse at night or after exertion. Wheezing
+  on exam. Reversible airflow obstruction.
+- COPD: chronic productive cough on most days for at least three months
+  in two consecutive years. History of smoking is common.
+- Postnasal drip: cough triggered by upper-airway secretions, often with
+  rhinitis or sinusitis.
+- GERD: chronic dry cough worse when supine, may be associated with
+  heartburn or regurgitation.
+- Tuberculosis: chronic cough greater than three weeks, weight loss,
+  night sweats, hemoptysis in advanced cases.
+- Lung cancer: persistent cough, hemoptysis, weight loss, fatigue,
+  particularly in smokers older than 50.
+
+## Key history-taking points
+
+1. Onset and duration (acute < 3 weeks, subacute 3–8 weeks, chronic > 8).
+2. Productive vs dry; sputum colour, volume, blood.
+3. Associated symptoms: fever, dyspnea, chest pain, weight loss.
+4. Triggers: cold air, exertion, lying down, allergens.
+5. Exposures: tobacco, occupational dusts, sick contacts, travel.
+6. Past medical history: asthma, COPD, GERD, malignancy, immune status.
+7. Medications: ACE inhibitors (cough side effect), inhalers.
+
+## Patient education
+
+- Explain likely differential and reassure when appropriate.
+- Smoking cessation counselling when relevant.
+- Indications for further imaging or referral (red flags: hemoptysis,
+  weight loss, persistent symptoms, age > 50 with smoking history).
