@@ -44,7 +44,9 @@ full released dataset are distributed separately — see
 ├── docs/
 │   ├── pipeline.md                 Data-generation flow
 │   ├── runtime.md                  Runtime + grading flow
-│   └── dataset_card.md
+│   ├── dataset_card.md
+│   └── ethics.md
+├── croissant.json                  Croissant 1.0 + RAI metadata
 ├── run_all.sh                      bulk dataset generation
 ├── run_demo.sh                     interactive single-patient demo
 ├── requirements.txt
@@ -114,4 +116,11 @@ python -m src.pipeline.stage4_generate_scenario \
 Code is released under the [MIT License](LICENSE). The seed corpus and
 generated dataset are licensed separately — see
 [`data/README.md`](data/README.md) and
-[`docs/dataset_card.md`](docs/dataset_card.md).
+[`docs/dataset_card.md`](docs/dataset_card.md). Ethics, suitable /
+unsuitable uses, and risk mitigations are documented in
+[`docs/ethics.md`](docs/ethics.md). Machine-readable Croissant 1.0 +
+RAI metadata for the synthetic patient cohort is in
+[`croissant.json`](croissant.json). Outputs of the upstream OpenAI
+models (`gpt-4.1`, `gpt-4o`) are additionally governed by OpenAI's
+[Usage Policies](https://openai.com/policies/usage-policies) and
+[Sharing & Publication Policy](https://openai.com/policies/sharing-publication-policy).

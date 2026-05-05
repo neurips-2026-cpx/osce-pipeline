@@ -1,82 +1,169 @@
 # Dataset Card
 
-A short NeurIPS-style dataset card. Replace the placeholders with concrete
-numbers from your final release before submission.
+This card covers two related artefacts:
+
+1. The **synthetic patient cohort** produced by the four-stage pipeline
+   in this repository (`src/pipeline/`). Sample records are committed
+   under `data/samples/output/`; the bulk artefact is generated
+   locally from a closed reference corpus and is not redistributed
+   here. Companion machine-readable Croissant + RAI metadata:
+   [`../croissant.json`](../croissant.json).
+2. The **companion empirical-dialogue dataset** (`jieumcpx`): 49 text
+   history-taking sessions between 17 senior Korean medical-student
+   participants and a GPT-4o-driven virtual standardized patient,
+   released separately on HuggingFace with its own Croissant + RAI
+   metadata.
 
 ## Motivation
 
-Korean OSCE training materials are scarce, expensive to author by hand,
-and rarely available in machine-readable form. This dataset provides
-structured patient cohorts, OSCE-style interview checklists, and
-voice-ready standardised-patient scripts that can drive an LLM-based mock
-patient simulator. The intended consumers are medical educators, OSCE
-researchers, and developers building Korean clinical-skills tutors.
+Korean OSCE training materials are scarce, expensive to author by
+hand, and rarely available in machine-readable form. This work
+provides (a) a corpus-agnostic prompt-engineering pipeline that turns
+per-symptom reference text into structured patient cohorts,
+OSCE-style interview checklists, and voice-ready standardised-patient
+scripts, and (b) an empirical evaluation corpus measuring how a
+GPT-4o virtual standardized patient performs in real-time
+history-taking against medical students. Intended consumers: medical
+educators, OSCE researchers, and developers building Korean
+clinical-skills tutors.
 
 ## Composition
 
-Each row in the final release is one fictional patient and contains:
+### Synthetic patient cohort
+
+Each record is one fictional patient with:
 
 - chief complaint (`symptom`)
 - diagnosis (`disease`)
 - demographic + vital block (`name`, `age`, `gender`, `vital_sign`)
-- structured OSCE checklist (`checklist`) — list of `(interview_item,
-  purpose)` pairs, ≥ 20 items
-- standardised-patient script (`prompt`) — 4–5 paragraph Korean monologue,
-  voice-ready (numerals spelled out, lay vocabulary)
+- structured OSCE checklist (`checklist`) — list of
+  `(interview_item, purpose)` pairs, ≥ 20 items
+- standardised-patient script (`prompt`) — 4–5 paragraph Korean
+  monologue, voice-ready (numerals spelled out, lay vocabulary)
 
-Approximate scale at release time: **TODO — fill in symptoms, patients,
-total tokens once frozen.**
+Per-symptom batch size is **5 patients** (stage 1). The total scale
+of the local bulk artefact depends on the operator's reference
+corpus; the published `prompts/` directory and sample files document
+the schema.
+
+Released sample files (committed):
+
+| File | Schema |
+|---|---|
+| `data/samples/output/sample_diseases.json` | Stage 1 — 1 symptom × 1 patient. |
+| `data/samples/output/sample_with_checklist.json` | Stage 3 — same patient with the OSCE checklist attached. |
+| `data/samples/output/sample_with_scenario.json` | Stage 4 — same patient with the polished standardised-patient `prompt` field. |
+
+### Empirical dialogue dataset (`jieumcpx`)
+
+| Quantity | Value |
+|---|---|
+| Sessions | 49 |
+| Participants | 17 (anonymised to `R001`–`R017`) |
+| QA turns | 1,763 |
+| Clinical scenarios | 27 |
+| Language | Korean |
+| Collection window | 2025-08 to 2026-05 |
+
+Every session is a real-time text-based history-taking encounter:
+student-typed question + GPT-4o VSP response. Per-session metadata
+(disease, symptom, synthetic patient name, status, automated total
+score, created-at timestamp) is preserved.
 
 ## Collection process
 
-Synthesised end-to-end with `gpt-4.1` from a per-symptom reference corpus
-(medical-education chapters). The four-stage pipeline is the entire
-"collection" process — there is no separate human authoring step. See
+### Synthetic patient cohort
+
+Synthesised end-to-end with `gpt-4.1` (temperature=0.2, seed=42) from
+a per-symptom reference corpus (Korean medical-education chapters).
+The four-stage pipeline is the entire "collection" process — there
+is no separate human authoring step. See
 [`pipeline.md`](pipeline.md) and the prompt documentation under
 [`../prompts/`](../prompts/).
 
-The runtime + grading path used `gpt-4o`. The auto-grader's calibration
-references and the simulator system prompt are documented in
-[`runtime.md`](runtime.md) and prompts 5–9 under [`../prompts/`](../prompts/).
+### Empirical dialogue dataset
+
+Collected via a deployed web-based VSP platform. Each student-typed
+question was answered by `gpt-4o-2024-11-20` (temperature=0.5,
+seed=42) under the persona-injection prompt at
+[`../src/prompts/ko.py::CHATBOT_SYSTEM_PROMPT`](../src/prompts/ko.py).
+Per-session evaluation scores were generated by
+`gpt-4o-2024-11-20` (temperature=0, seed=42).
 
 ## Preprocessing
 
-- Stage 1 outputs are validated against a JSON schema by
-  `src.utils.trimAndLoadJson`, which is tolerant of trailing commas and
-  control characters that appear occasionally in LLM JSON output.
-- Stage 4 polish enforces voice-ready surface form: Arabic numerals
+- Stage-1/3 outputs are validated against a JSON schema by
+  `src.utils.trimAndLoadJson`, which is tolerant of trailing commas
+  and control characters that occasionally appear in LLM JSON.
+- Stage-4 polish enforces voice-ready surface form: Arabic numerals
   expanded, medical jargon replaced with lay vocabulary, sentences
-  atomised.
+  atomised, paragraphs broken into 4–5 spoken-style chunks.
+- For the empirical dataset, participant names and email addresses
+  are deterministically replaced with study IDs (`R001`–`R017`)
+  before release; the original mapping is destroyed at build time.
+  See the HuggingFace release's `docs/anonymisation.md`.
 
 ## Recommended uses
 
 - Training and evaluating LLM-based standardised-patient simulators.
 - Benchmarking automated OSCE scoring against checklist rubrics.
-- Augmenting Korean medical-dialogue corpora.
+- Multi-rater evaluation methodology for clinical-dialogue agents.
+- Augmenting Korean medical-dialogue corpora under appropriate
+  licensing.
 
 ## Limitations and risks
 
-- All patients, names, and case details are **synthetic**. They are not
-  drawn from real clinical encounters.
-- The reference corpus is a closed Korean medical-education set; coverage
-  reflects what that corpus emphasises. Expect over-representation of
-  conditions covered in undergraduate OSCE curricula and
+- Synthetic cohort: all patients, names, and case details are
+  fictional; not drawn from real clinical encounters. The reference
+  corpus is closed Korean medical education; expect over-
+  representation of common undergraduate-OSCE conditions and
   under-representation of rarer specialties.
-- Both gpt-4.1 (data-gen) and gpt-4o (runtime + grader) occasionally
-  fabricate plausible-sounding but clinically marginal items. Do not use
-  these artifacts for clinical decision support; use only for
-  *educational simulation*.
+- Empirical dataset: 17 senior medical students, Korean only,
+  text-only; lacks the verbal and non-verbal cues of in-person OSCE.
+  High automated scores reflect role-play fidelity, not clinical
+  competence.
+- Both `gpt-4.1` (data-gen) and `gpt-4o` (runtime + grader)
+  occasionally fabricate plausible-sounding but clinically marginal
+  items. **Do not use any artefact in this repository for clinical
+  decision support; use only for educational simulation.**
 - Korean-only canonical release; English variants ship as alternative
-  prompts but were not used in the experiment.
+  prompts but were not used in either released artefact.
+
+See [`ethics.md`](ethics.md) for the full risk + mitigation
+breakdown.
 
 ## Distribution
 
-- Code and prompts: this repository, MIT licensed.
-- Generated artifacts: distributed separately. **TODO — link the release
-  / HuggingFace dataset URL and the artifact license once published.**
+- **Code and prompts** (this repository): MIT license.
+- **Synthetic patient cohort (bulk)**: not redistributed — see
+  [`../data/README.md`](../data/README.md).
+- **Empirical dialogue dataset (`jieumcpx`)**: released on
+  HuggingFace under CC-BY-NC-SA-4.0. Repository URL will appear
+  here once the anonymous account is published; until then refer
+  to the local `huggingface_release/` directory in the authors'
+  build tree.
+
+## Third-party model attribution
+
+The artefacts in this repository depend on OpenAI-hosted models
+(`gpt-4.1`, `gpt-4o-2024-11-20`). Output of those models is governed
+by OpenAI's
+[Usage Policies](https://openai.com/policies/usage-policies) and
+[Sharing & Publication Policy](https://openai.com/policies/sharing-publication-policy)
+in addition to this repository's MIT license. Consumers of any
+released artefact must comply with both.
 
 ## Maintenance
 
 Bug reports and reproduction questions: open an issue against this
-repository. The seed corpus is closed; contributions to the *pipeline*
-(prompts, post-processing, evaluation harnesses) are welcome.
+repository. The seed corpus is closed; contributions to the
+*pipeline* (prompts, post-processing, evaluation harnesses) are
+welcome.
+
+## Machine-readable metadata
+
+- [`../croissant.json`](../croissant.json) — Croissant 1.0 + RAI
+  extension for the synthetic patient cohort. Mandatory for the
+  NeurIPS 2026 Evaluations & Datasets Track.
+- The empirical dialogue dataset has its own `croissant.json`
+  inside the HuggingFace release.

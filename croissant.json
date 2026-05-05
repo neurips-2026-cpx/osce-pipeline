@@ -1,0 +1,110 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "sc": "https://schema.org/",
+    "ml": "http://mlcommons.org/croissant/",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "data": {"@id": "ml:data", "@type": "@json"},
+    "dataType": {"@id": "ml:dataType", "@type": "@vocab"},
+    "extract": "ml:extract",
+    "field": "ml:field",
+    "fileProperty": "ml:fileProperty",
+    "format": "ml:format",
+    "includes": "ml:includes",
+    "isEnumeration": "ml:isEnumeration",
+    "jsonPath": "ml:jsonPath",
+    "key": "ml:key",
+    "md5": "ml:md5",
+    "parentField": "ml:parentField",
+    "path": "ml:path",
+    "recordSet": "ml:recordSet",
+    "references": "ml:references",
+    "regex": "ml:regex",
+    "repeated": "ml:repeated",
+    "replace": "ml:replace",
+    "separator": "ml:separator",
+    "source": "ml:source",
+    "subField": "ml:subField",
+    "transform": "ml:transform"
+  },
+  "@type": "sc:Dataset",
+  "name": "osce-pipeline-synthetic-cohort",
+  "description": "Synthetic Korean OSCE patient cohort produced by a four-stage prompt-engineering pipeline. Each record is one fictional patient with chief complaint, ground-truth diagnosis, demographic + vital block, OSCE-style interview checklist, and a polished standardised-patient script. The bulk artefacts are generated locally from a closed reference corpus and are not redistributed in this repository — see the dataset_card and data/README.md.",
+  "license": "https://opensource.org/licenses/MIT",
+  "url": "https://github.com/neurips-2026-cpx/osce-pipeline",
+  "citation": "Anonymous. OSCE Simulated-Patient Pipeline. NeurIPS 2026 (under review).",
+  "version": "1.0.0",
+  "conformsTo": "http://mlcommons.org/croissant/1.0",
+  "datePublished": "2026-05-05",
+  "keywords": [
+    "OSCE",
+    "Korean",
+    "medical education",
+    "synthetic patient",
+    "GPT-4.1",
+    "checklist",
+    "standardized patient"
+  ],
+  "inLanguage": "ko",
+  "creator": {"@type": "Organization", "name": "Anonymous (NeurIPS 2026 submission)"},
+
+  "rai:dataLimitations": "Synthetic Korean OSCE patient records generated end-to-end by GPT-4.1 from a closed Korean medical-education reference corpus. Coverage and emphasis reflect what that corpus covers — expect over-representation of common undergraduate-OSCE conditions and under-representation of rare specialties. Korean-language only; English prompts ship as alternates but were not used in the released artefacts. Prompt outputs are not clinically verified.",
+  "rai:dataBiases": "Korean-language origin and Korean medical-education curriculum. Disease distribution reflects the closed seed corpus, biased toward chief complaints emphasised in the 의사실기시험 (Korean OSCE) curriculum. Demographic distributions (age, gender) are LLM-imputed conditional on disease, so they reproduce LLM training-data priors rather than Korean population epidemiology.",
+  "rai:personalSensitiveInformation": "All patient records are fictional. No PHI; no real patient encounters. Patient names are LLM-generated and synthetic. The closed seed corpus is not redistributed in this repository.",
+  "rai:dataUseCases": "Validity established for: training and evaluating LLM-based standardized-patient simulators, benchmarking automated OSCE checklist scoring, augmenting Korean medical-dialogue corpora. Validity NOT established for: clinical decision-making, diagnosis, evaluation in non-Korean contexts, or any standalone medical training without supervisory oversight.",
+  "rai:dataSocialImpact": "Positive: lowers the cost of authoring OSCE practice materials and supports research on LLM-based clinical-skills tutors. Negative: LLM-generated patient personas may include plausible-but-clinically-marginal content; if mistaken for clinically validated material, downstream learners could be miscalibrated. Mitigations: explicit not-for-clinical-decision-making statement, verbatim prompt and decoding-parameter disclosure, sample-only repository release with full bulk artefacts gated.",
+  "rai:hasSyntheticData": true,
+  "rai:syntheticDataDescription": "All four data-generation stages call gpt-4.1 (temperature=0.2, seed=42, no streaming): (1) per-symptom patient cohorts of 5 fictional patients each from a closed reference chapter, (2) merge into a single JSON tree, (3) OSCE-style 20+ item interview checklist per patient grounded in the same chapter, (4) two-step scenario authoring — a 2,000–2,500 character draft followed by a polish that spells out numerals, simplifies jargon, and breaks the text into 4–5 paragraphs voice-ready for a standardized-patient simulator. The full prompt set (4 data-gen + 5 runtime templates) is published verbatim under prompts/ in both Korean and English.",
+  "rai:wasDerivedFrom": "A closed Korean medical-education reference corpus: one UTF-8 plain-text chapter per chief complaint, supplied locally by the authors. The corpus is not redistributed in this repository for copyright reasons; see data/README.md for the bring-your-own-corpus protocol.",
+  "rai:wasGeneratedBy": "Pipeline: stages 1-4 in src/pipeline/, all using gpt-4.1 (temperature=0.2, seed=42) via langchain_openai.ChatOpenAI. Decoding configuration is verbatim in the source. Stage 4 fans out across patients with asyncio.gather (default --batch-size 5). Prompts are bilingual via the OSCE_LANG environment variable; the canonical experiment uses Korean. The runtime simulator and auto-grader (src/runtime/, src/grading.py) call gpt-4o (temperature=0 for structured tasks, 0.5 for chat; seed=42) — these are evaluation-time only and do not contribute to the synthetic patient cohort itself.",
+
+  "distribution": [
+    {
+      "@type": "sc:FileObject",
+      "@id": "sample_diseases.json",
+      "name": "sample_diseases.json",
+      "description": "Stage 1 sample output — one symptom × one patient.",
+      "contentUrl": "data/samples/output/sample_diseases.json",
+      "encodingFormat": "application/json",
+      "sha256": "656940fa28b890c59baea83745f7c7f1d43a51b9cf0d31adce12dd0e8d919b6a"
+    },
+    {
+      "@type": "sc:FileObject",
+      "@id": "sample_with_checklist.json",
+      "name": "sample_with_checklist.json",
+      "description": "Stage 3 sample — same patient with a 20+-item OSCE checklist.",
+      "contentUrl": "data/samples/output/sample_with_checklist.json",
+      "encodingFormat": "application/json",
+      "sha256": "124b6385f5c383b5981f144720b307a3f1a1107aa4170437fe9df469b9204793"
+    },
+    {
+      "@type": "sc:FileObject",
+      "@id": "sample_with_scenario.json",
+      "name": "sample_with_scenario.json",
+      "description": "Stage 4 sample — same patient with the polished standardised-patient prompt field. The simulator-ready artefact.",
+      "contentUrl": "data/samples/output/sample_with_scenario.json",
+      "encodingFormat": "application/json",
+      "sha256": "17c12ec50ed22e7530dd9675282f489ac963486596a6aa8bd3fe27f358a8ebb0"
+    }
+  ],
+
+  "recordSet": [
+    {
+      "@type": "ml:RecordSet",
+      "@id": "patients",
+      "name": "patients",
+      "description": "One record per fictional patient. Schema is shared by every stage's output JSON; later stages add fields without dropping prior ones.",
+      "field": [
+        {"@type": "ml:Field", "@id": "patients/symptom", "name": "symptom", "dataType": "sc:Text", "description": "Chief complaint (Korean)."},
+        {"@type": "ml:Field", "@id": "patients/disease", "name": "disease", "dataType": "sc:Text", "description": "Ground-truth diagnosis."},
+        {"@type": "ml:Field", "@id": "patients/name", "name": "name", "dataType": "sc:Text", "description": "Synthetic patient name."},
+        {"@type": "ml:Field", "@id": "patients/age", "name": "age", "dataType": "sc:Integer"},
+        {"@type": "ml:Field", "@id": "patients/gender", "name": "gender", "dataType": "sc:Text"},
+        {"@type": "ml:Field", "@id": "patients/vital_sign", "name": "vital_sign", "dataType": "sc:Text", "description": "Free-text BP / HR / RR / temperature block."},
+        {"@type": "ml:Field", "@id": "patients/checklist", "name": "checklist", "dataType": "sc:Text", "description": "Stage 3 output — JSON object with 20+ {interview_item, purpose} entries."},
+        {"@type": "ml:Field", "@id": "patients/prompt", "name": "prompt", "dataType": "sc:Text", "description": "Stage 4 output — voice-ready 4–5 paragraph standardised-patient monologue."}
+      ]
+    }
+  ]
+}
